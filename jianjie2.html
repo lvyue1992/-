@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+	<script src="js/jquery/jquery.js"></script>
+	<style type="text/css">
+		
+	</style>
+</head>
+<body>
+<div>
+	<div class = 'div1' style="float:left;"> 
+		<select id="icons">
+			<option>微信</option>
+			<option>电脑</option>
+			<option>苹果</option>
+			<option>手机</option>
+			<option>微信支付</option>
+			<option>最强蜗牛</option>
+			<option>龙之谷</option>
+			<option>问道手游</option>
+			<option>剑与远征</option>
+			<option>阿里云</option>
+			<option>浏览器</option>
+			<!-- <option>cad</option>
+			<option>excel</option>
+			<option>邮件</option>
+			<option>ipad</option>
+			<option>ps</option>
+			<option>qq</option>
+			<option>word</option>
+			<option>wps</option>
+			<option>华为</option>
+			<option>小米</option>
+			<option>游戏</option>
+			<option>安卓</option>
+			<option>淘宝</option>
+			<option>支付宝</option>
+			<option>烹饪1</option>
+			<option>烹饪2</option> -->
+		</select><br>
+		<input id="background" value="" placeholder="背景图"><br>
+		<!-- <button id="gen1">随机</button> -->
+		<input id="icon" value=""  placeholder="图标"><br>
+		<!-- <a href="https://www.easyicon.net/" target="_blank">找图标</a>
+		在图标图片上右键打开图片链接获得图片链接<br> -->
+		<input id="text1" value="" placeholder="第一行文字"><br>
+		<input id="text2" value="" placeholder="第二行文字"><br>
+		文字背景色<input id="fontColor" value="rgba(255,255,255,0.9)">
+	</div>
+	<div style="float:left;margin:50px 30px;"> 
+		<button id="generate">生成</button><br/>
+	</div>
+	<div  style="float:left;margin:0 0 0 0;"> 
+	<canvas width="600" height="240" style="width: 600px;height: 240px;border: wheat solid 1px" id="canvas"></canvas>
+	</div>
+</div>
+<image class="img" style="display:none;" id="backgroundImage"></image>
+<image class="img" style="display:none;" id="iconImage"></image>
+<script>
+    let images = new Array(20).fill().map((e, i) => `images/${i + 1}.png`);
+    //$("#background").val(images[Math.random() * images.length | 0]);
+
+    $("#gen1").click(function () {
+        $("#background").val(images[Math.random() * images.length | 0]);
+    });
+
+    $("#icons").change(function () {
+        $('#icon').val(`icon/${$(this).val()}.png`);
+        $('#background').val(`images/${$(this).val()}.png`);
+    });
+    $("#generate").click(function () {
+        $("#backgroundImage").attr("src", $("#background").val());
+        $("#iconImage").attr("src", $("#icon").val());
+
+
+        $.when.apply(null, $(".img").map(function (i, e) {
+            var dfd = $.Deferred();
+            if (e.complete) {
+                dfd.resolve()
+            }
+            e.onload = function () {
+                dfd.resolve()
+            };
+            return dfd;
+        }).toArray()).done(function () {
+            //获得画布元素
+            canvas1 = document.getElementById("canvas");
+            //获得2维绘图的上下文
+            ctx = canvas1.getContext("2d");
+            //图片
+            apple = document.getElementById("backgroundImage");
+            //将图像绘制到画布的，图片的左上角
+            ctx.drawImage(apple, 0, 0);
+
+            //画一个实心矩形
+
+            fillRoundRect(ctx, 66, 66, 468, 108, 12, $("#fontColor").val());
+
+            apple = document.getElementById("iconImage");
+            //将图像绘制到画布的，图片的左上角
+            ctx.drawImage(apple, 96, 79.2, 81.6, 81.6);
+
+            // 设置颜色
+            ctx.fillStyle = "black";
+            // 设置水平对齐方式
+            ctx.textAlign = "left";
+            // 设置垂直对齐方式
+            ctx.textBaseline = "middle";
+            if ($("#text2").val().trim()) {
+                // 设置字体
+                ctx.font = "28px bold 黑体";
+                // 绘制文字（参数：要写的字，x坐标，y坐标）
+                ctx.fillText($("#text1").val(), 201.6, 104.4, 297.6);
+                ctx.fillText($("#text2").val(), 201.6, 141.6, 297.6);
+            } else {
+                // 设置字体
+                ctx.font = "36px bold 黑体";
+                // 绘制文字（参数：要写的字，x坐标，y坐标）
+                ctx.fillText($("#text1").val(), 201.6, 122.4, 297.6);
+            }
+        });
+    });
+
+    function fillRoundRect(cxt, x, y, width, height, radius, /*optional*/ fillColor) {
+        //圆的直径必然要小于矩形的宽高
+        if (2 * radius > width || 2 * radius > height) {
+            return false;
+        }
+
+        cxt.save();
+        cxt.translate(x, y);
+        //绘制圆角矩形的各个边
+        drawRoundRectPath(cxt, width, height, radius);
+        cxt.fillStyle = fillColor || "#000"; //若是给定了值就用给定的值否则给予默认值
+        cxt.fill();
+        cxt.restore();
+    }
+
+    function drawRoundRectPath(cxt, width, height, radius) {
+        cxt.beginPath(0);
+        //从右下角顺时针绘制，弧度从0到1/2PI
+        cxt.arc(width - radius, height - radius, radius, 0, Math.PI / 2);
+
+        //矩形下边线
+        cxt.lineTo(radius, height);
+
+        //左下角圆弧，弧度从1/2PI到PI
+        cxt.arc(radius, height - radius, radius, Math.PI / 2, Math.PI);
+
+        //矩形左边线
+        cxt.lineTo(0, radius);
+
+        //左上角圆弧，弧度从PI到3/2PI
+        cxt.arc(radius, radius, radius, Math.PI, Math.PI * 3 / 2);
+
+        //上边线
+        cxt.lineTo(width - radius, 0);
+
+        //右上角圆弧
+        cxt.arc(width - radius, radius, radius, Math.PI * 3 / 2, Math.PI * 2);
+
+        //右边线
+        cxt.lineTo(width, height - radius);
+        cxt.closePath();
+    }
+</script>
+</body>
+</html>
